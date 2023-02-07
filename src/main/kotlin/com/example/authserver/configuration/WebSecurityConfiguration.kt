@@ -2,7 +2,9 @@ package com.example.authserver.configuration
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.NoOpPasswordEncoder
@@ -10,14 +12,19 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 
-@Configuration
+@EnableWebSecurity
+@Configuration(proxyBeanMethods = false)
 class WebSecurityConfiguration {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
-        http.formLogin()
-            .and().authorizeRequests().anyRequest().authenticated()
-            .and().build()
+    fun defaultSecurityFilterChain(http: HttpSecurity): SecurityFilterChain =
+        http
+            .authorizeHttpRequests { authorize ->
+                authorize.anyRequest().authenticated()
+            }
+            .formLogin(withDefaults())
+            .csrf().disable()
+            .build()
 
     @Bean
     fun userDetailsService(): UserDetailsService = InMemoryUserDetailsManager()
@@ -27,6 +34,7 @@ class WebSecurityConfiguration {
                     .withUsername("u1")
                     .password("pass")
                     .authorities("read")
+                    .authorities("write")
                     .build()
             )
         }
