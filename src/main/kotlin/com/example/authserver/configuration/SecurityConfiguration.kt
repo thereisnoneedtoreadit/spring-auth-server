@@ -40,10 +40,10 @@ class SecurityConfiguration {
     @Bean
     @Order(1)
     @Throws(Exception::class)
-    fun asSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun asSecurityFilterChain(http: HttpSecurity): SecurityFilterChain? {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http)
         http.getConfigurer(OAuth2AuthorizationServerConfigurer::class.java).oidc(Customizer.withDefaults())
-        http.exceptionHandling { e: ExceptionHandlingConfigurer<HttpSecurity> ->
+        http.exceptionHandling { e: ExceptionHandlingConfigurer<HttpSecurity?> ->
             e
                 .authenticationEntryPoint(LoginUrlAuthenticationEntryPoint("/login"))
         }
@@ -53,7 +53,7 @@ class SecurityConfiguration {
     @Bean
     @Order(2)
     @Throws(Exception::class)
-    fun appSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun appSecurityFilterChain(http: HttpSecurity): SecurityFilterChain? {
         http
             .formLogin()
             .and()
@@ -62,7 +62,7 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun userDetailsService(): UserDetailsService {
+    fun userDetailsService(): UserDetailsService? {
         val user1 = User.withUsername("user")
             .password("password")
             .authorities("read")
@@ -71,12 +71,12 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder {
+    fun passwordEncoder(): PasswordEncoder? {
         return NoOpPasswordEncoder.getInstance()
     }
 
     @Bean
-    fun registeredClientRepository(): RegisteredClientRepository {
+    fun registeredClientRepository(): RegisteredClientRepository? {
         val registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
             .clientId("client")
             .clientSecret("secret")
@@ -91,17 +91,17 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun authorizationServerSettings(): AuthorizationServerSettings {
+    fun authorizationServerSettings(): AuthorizationServerSettings? {
         return AuthorizationServerSettings.builder().build()
     }
 
     @Bean
-    fun tokenSettings(): TokenSettings {
+    fun tokenSettings(): TokenSettings? {
         return TokenSettings.builder().build()
     }
 
     @Bean
-    fun clientSettings(): ClientSettings {
+    fun clientSettings(): ClientSettings? {
         return ClientSettings.builder()
             .requireAuthorizationConsent(false)
             .requireProofKey(false)
@@ -109,10 +109,10 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun jwkSource(): JWKSource<SecurityContext> {
+    fun jwkSource(): JWKSource<SecurityContext?>? {
         val rsaKey = generateRsa()
         val jwkSet = JWKSet(rsaKey)
-        return JWKSource { jwkSelector: JWKSelector, securityContext: SecurityContext ->
+        return JWKSource { jwkSelector: JWKSelector, securityContext: SecurityContext? ->
             jwkSelector.select(
                 jwkSet
             )
